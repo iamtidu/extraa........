@@ -1,0 +1,241 @@
+i want to make a website in this we have pages
+Login [ In this we have field Name , email , password and role (Product manager, Developer, Security Team , Performnce team , magnager and Architecture ) once user get login go to home page , where Product manger can create a new Ticket only aother role person just view and open it not create new also in this page we have search function and view all Ticket
+
+Now when the product manger click on add New Ticket then open a popup in this they fill id , decription and twp btn one fro verify id anotherfor next 
+
+When the product manager click the next btn then open a dashboard inside this in there is navbar , in left side bar all the components of the sequential diagram , and in right side show the commnets on which componets commnet occurs , when click on any component in right side bar open option for edit move , the component , in now the work place is same as the drawio/figram it move the frame pan zoomout or zoomin like function as same as the figma workplace, this sequential property adding only right have the product team 
+
+when developer team open any ticket create by product team it can add where they change like in activation they change so when right click on any compont of sqential digram they click it open a canvas inside this developer add all the flow how they solve the error for this in left siderbar it add the digram , inside the developer compontes when right click on any componets open addcomment or add decriptin for first time decrption add only one time and then so the view decription not add decription and also when click on view description then pop inside this opryion for edit , cancel or save , for comment we can add as much as want , not fix , and also all the changes is store in cache , we can do and undo , as the same role of developer manger and architecture do , but securtity , performance team only view and comment on the component 
+
+so mainly in this 
+product manger make a sequential digram for any new ticket or request ,
+then developer view the sequential digram and on this digram it click on any component then option for open canve [name flow] when canva open the user add the component and link how the code is flow how they solve the problem in the flow and also devloer right click on the comopnets and add the commnets and decription , and i am using reacat js , node js express and mongodb with live show coomnest and changes we add the webscokets , and it also store the history changes not only current so we can do and undo it , make a best gui also using tailwind and good looking gui 
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Flow | Auto-Sequence Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; overflow: hidden; }
+        #stage-parent { background-color: #cbd5e1; width: 100%; height: 100%; cursor: default; }
+        .property-input { @apply w-full p-2 bg-slate-50 border rounded text-sm mb-3 outline-none focus:ring-2 focus:ring-blue-500; }
+        .btn-primary { @apply w-full bg-blue-600 text-white py-2 rounded font-bold text-sm hover:bg-blue-700 transition; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <header class="h-16 bg-white border-b flex items-center justify-between px-6 z-20">
+        <div class="flex items-center gap-4">
+            <h1 class="font-black text-xl text-slate-800">PRO-FLOW <span class="text-blue-600">AUTO</span></h1>
+            <div class="h-6 w-[1px] bg-slate-200"></div>
+            <span class="text-sm text-slate-500 font-medium">Ticket: #ARCH-772</span>
+        </div>
+        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+            Wheel: Zoom | Middle-Click: Pan | Auto-Expanding Canvas
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <aside class="w-64 bg-white border-r p-5 flex flex-col gap-6 z-20">
+            <div>
+                <h4 class="text-[10px] font-black text-slate-400 uppercase mb-4">Add Elements</h4>
+                <button onclick="addLifelinePrompt()" class="w-full flex items-center gap-3 p-3 border rounded-xl hover:bg-blue-50 transition mb-2">
+                    <i class="fas fa-plus-circle text-blue-500"></i>
+                    <span class="text-sm font-bold">New Lifeline</span>
+                </button>
+                <button onclick="addMessagePrompt()" class="w-full flex items-center gap-3 p-3 border rounded-xl hover:bg-emerald-50 transition">
+                    <i class="fas fa-arrow-right text-emerald-500"></i>
+                    <span class="text-sm font-bold">New Message</span>
+                </button>
+            </div>
+            
+            <div class="border-t pt-6">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase mb-4">Fragments</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="p-2 border rounded text-[10px] font-bold hover:bg-slate-50">LOOP</button>
+                    <button class="p-2 border rounded text-[10px] font-bold hover:bg-slate-50">ALT</button>
+                </div>
+            </div>
+        </aside>
+
+        <div id="stage-parent"></div>
+
+        <aside id="properties-panel" class="w-80 bg-white border-l p-6 z-20 overflow-y-auto">
+            <h4 class="text-[10px] font-black text-slate-400 uppercase mb-6">Properties Editor</h4>
+            
+            <div id="empty-state" class="text-center py-20 text-slate-300">
+                <i class="fas fa-mouse-pointer text-3xl mb-4"></i>
+                <p class="text-xs">Click a component on the canvas to edit</p>
+            </div>
+
+            <div id="editor-ui" class="hidden">
+                <label class="text-[10px] font-bold text-slate-400">LABEL NAME</label>
+                <input type="text" id="prop-name" class="property-input">
+
+                <label class="text-[10px] font-bold text-slate-400">SEQUENCE ORDER (X-Pos)</label>
+                <input type="number" id="prop-seq" class="property-input">
+
+                <label class="text-[10px] font-bold text-slate-400">LIFETIME DURATION (Height)</label>
+                <input type="number" id="prop-height" class="property-input">
+
+                <button onclick="updateComponent()" class="btn-primary mt-4">Save Changes</button>
+                <button onclick="deleteComponent()" class="w-full text-red-500 text-xs font-bold mt-4">Delete Component</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        let stage, layer, paper;
+        let lifelines = [];
+        let messages = [];
+        let selectedId = null;
+
+        const CONFIG = {
+            startX: 150,
+            spacing: 250,
+            defaultHeight: 600,
+            paperPadding: 200
+        };
+
+        function initKonva() {
+            stage = new Konva.Stage({
+                container: 'stage-parent',
+                width: document.getElementById('stage-parent').offsetWidth,
+                height: document.getElementById('stage-parent').offsetHeight,
+                draggable: true
+            });
+
+            layer = new Konva.Layer();
+            stage.add(layer);
+
+            // INITIAL PAPER
+            paper = new Konva.Rect({
+                x: 0, y: 0,
+                width: 1000, height: 1000,
+                fill: 'white',
+                shadowBlur: 15, shadowOpacity: 0.1
+            });
+            layer.add(paper);
+
+            // ZOOM HANDLER
+            stage.on('wheel', (e) => {
+                e.evt.preventDefault();
+                let oldScale = stage.scaleX();
+                let pointer = stage.getPointerPosition();
+                let mousePointTo = { x: (pointer.x - stage.x()) / oldScale, y: (pointer.y - stage.y()) / oldScale };
+                let newScale = e.evt.deltaY < 0 ? oldScale * 1.1 : oldScale / 1.1;
+                stage.scale({ x: newScale, y: newScale });
+                stage.position({ x: pointer.x - mousePointTo.x * newScale, y: pointer.y - mousePointTo.y * newScale });
+                stage.batchDraw();
+            });
+        }
+
+        // --- CORE LOGIC ---
+
+        function addLifelinePrompt() {
+            const name = prompt("Enter Lifeline Name (Actor/Object):", "New Service");
+            if (!name) return;
+
+            const id = 'll_' + Date.now();
+            const index = lifelines.length;
+            
+            lifelines.push({
+                id: id,
+                name: name,
+                height: CONFIG.defaultHeight,
+                order: index
+            });
+
+            renderDiagram();
+        }
+
+        function renderDiagram() {
+            // 1. Clear existing components (keep paper)
+            layer.destroyChildren();
+            layer.add(paper);
+
+            // 2. Sort lifelines by order
+            lifelines.sort((a, b) => a.order - b.order);
+
+            // 3. Update Paper Size Dynamically
+            const requiredWidth = (lifelines.length * CONFIG.spacing) + (CONFIG.paperPadding * 2);
+            const maxHeight = Math.max(...lifelines.map(l => l.height), CONFIG.defaultHeight) + 200;
+            paper.width(Math.max(requiredWidth, 1000));
+            paper.height(maxHeight);
+
+            // 4. Draw Lifelines
+            lifelines.forEach((ll, i) => {
+                const xPos = CONFIG.startX + (i * CONFIG.spacing);
+                const group = new Konva.Group({ x: xPos, y: 150, id: ll.id });
+
+                // The Stem
+                const line = new Konva.Line({
+                    points: [60, 50, 60, ll.height],
+                    stroke: '#94a3b8', strokeWidth: 2, dash: [8, 5]
+                });
+
+                // The Box
+                const rect = new Konva.Rect({
+                    width: 120, height: 50, fill: '#1e293b', cornerRadius: 4,
+                    stroke: selectedId === ll.id ? '#3b82f6' : null,
+                    strokeWidth: 3
+                });
+
+                const text = new Konva.Text({
+                    text: ll.name.toUpperCase(), width: 120, align: 'center',
+                    padding: 18, fill: 'white', fontStyle: 'bold', fontSize: 12
+                });
+
+                group.add(line, rect, text);
+                
+                group.on('click', () => selectComponent(ll.id, 'lifeline'));
+                layer.add(group);
+            });
+
+            layer.draw();
+        }
+
+        function selectComponent(id, type) {
+            selectedId = id;
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('editor-ui').classList.remove('hidden');
+
+            if(type === 'lifeline') {
+                const data = lifelines.find(l => l.id === id);
+                document.getElementById('prop-name').value = data.name;
+                document.getElementById('prop-seq').value = data.order;
+                document.getElementById('prop-height').value = data.height;
+            }
+            renderDiagram(); // Refresh to show selection border
+        }
+
+        function updateComponent() {
+            const data = lifelines.find(l => l.id === selectedId);
+            if(data) {
+                data.name = document.getElementById('prop-name').value;
+                data.order = parseInt(document.getElementById('prop-seq').value);
+                data.height = parseInt(document.getElementById('prop-height').value);
+            }
+            renderDiagram();
+        }
+
+        function deleteComponent() {
+            lifelines = lifelines.filter(l => l.id !== selectedId);
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('editor-ui').classList.add('hidden');
+            selectedId = null;
+            renderDiagram();
+        }
+
+        window.onload = initKonva;
+    </script>
+</body>
+</html>
